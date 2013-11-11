@@ -25,6 +25,7 @@
 #include <arpa/inet.h>
 
 #include <gcrypt.h>
+#include "bcrypt/bcrypt.h"
 
 #include "backend_pgsql.h"
 #include "pam_pgsql.h"
@@ -328,6 +329,16 @@ password_encrypt(modopt_t *options, const char *user, const char *pass, const ch
 
 			for(i = 0; i < sizeof(hash); i++)
 				sprintf(&s[i * 2], "%.2x", hash[i]);
+		}
+		break;
+		case PW_BCRYPT: {
+			char crypted[100];
+			char *bcryptsalt;
+			bcryptsalt=strndup(salt, 29);
+			bcrypt(pass,bcryptsalt,crypted);
+			free(bcryptsalt);
+			s = strdup(crypted);
+			free(crypted);
 		}
 		break;
 		case PW_CLEAR:
