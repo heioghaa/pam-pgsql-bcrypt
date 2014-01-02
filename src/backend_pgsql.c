@@ -23,10 +23,8 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <arpa/inet.h>
-
 #include <gcrypt.h>
 #include "bcrypt/bcrypt.h"
-
 #include "backend_pgsql.h"
 #include "pam_pgsql.h"
 
@@ -332,9 +330,17 @@ password_encrypt(modopt_t *options, const char *user, const char *pass, const ch
 		}
 		break;
 		case PW_BCRYPT: {
-			char crypted[100];
+			char *crypted;
 			char *bcryptsalt;
-			bcryptsalt=strndup(salt, 29);
+			crypted = malloc(100);
+			if (salt == NULL) { //change password, need new salt
+				bcryptsalt= malloc(29);
+				srandom(time(NULL));
+				u_int8_t seed = random() % 256;
+				bcrypt_gensalt(10, &seed, bcryptsalt);
+			} else { //compare passwords, oldpass is salt
+				bcryptsalt = strndup(salt, 29);
+			} 
 			bcrypt(pass,bcryptsalt,crypted);
 			free(bcryptsalt);
 			s = strdup(crypted);

@@ -111,7 +111,9 @@ read_config_file(modopt_t *options) {
                 options->pw_type = PW_CRYPT_MD5;
             } else if(!strcmp(val, "md5_postgres")) {
                 options->pw_type = PW_MD5_POSTGRES;
-            }
+            } else if(!strcmp(val, "bcrypt")) {
+		options->pw_type = PW_BCRYPT;
+	    }
         } else if(!strcmp(buffer, "debug")) {
             options->debug = 1;
         }
